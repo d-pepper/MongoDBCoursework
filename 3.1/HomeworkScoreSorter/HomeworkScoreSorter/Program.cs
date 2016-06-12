@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using MongoDB.Bson.Serialization.Conventions;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace HomeworkScoreSorter
 {
@@ -16,6 +18,10 @@ namespace HomeworkScoreSorter
 
         private static async void MainAsync(string[] args)
         {
+            var conventionPack = new ConventionPack();
+            conventionPack.Add(new CamelCaseElementNameConvention());
+            ConventionRegistry.Register("camelCase", conventionPack, t => true);
+
             var client = new MongoClient();
             var db = client.GetDatabase("school");
             var collection = db.GetCollection<Student>("students");
@@ -24,21 +30,53 @@ namespace HomeworkScoreSorter
 
             foreach (var doc in list)
             {
+                Console.WriteLine();
+                Console.WriteLine("STUDENT " + doc.Id);
+
+                RemoveLowestHomeWorkScore(doc);
+
+                await UpdateCollection(doc, collection);
+
                 Console.WriteLine(doc.ToBsonDocument());
+
+                Console.WriteLine();
+
+                Console.WriteLine();
+                Console.WriteLine("===============================================================");
             }
+        }
+
+        private static void RemoveLowestHomeWorkScore(Student doc)
+        {
+            var homeworkScores = doc.Scores
+                .Where(t => t.Type == "homework");
+
+            var orderedScores = homeworkScores
+                .OrderBy(x => x.Score);
+
+            var lowestHomeWorkScore = orderedScores.FirstOrDefault();
+
+            doc.Scores.Remove(lowestHomeWorkScore);
+        }
+
+        private static async Task UpdateCollection(Student doc, IMongoCollection<Student> collection)
+        {
+            await collection.UpdateOneAsync(
+                Builders<Student>.Filter.Eq(x => x.Id, doc.Id),
+                Builders<Student>.Update.Set(x => x.Scores, doc.Scores));
         }
     }
 
     public class Student
     {
-        public ObjectId _id { get; set; }
-        public string name { get; set; }
-        public List<Score> scores { get; set; }
+        public long Id { get; set; }
+        public string Name { get; set; }
+        public List<Result> Scores { get; set; }
     }
 
-    public class Score
+    public class Result
     {
-        public string type { get; set; }
-        public float score { get; set; }
+        public string Type { get; set; }
+        public double Score { get; set; }
     }
 }
