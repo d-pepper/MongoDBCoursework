@@ -12,7 +12,7 @@ namespace M101DotNet.WebApp.Models
         // The homework instructions have the
         // necessary schema.
         public string Author;
-        public string Comment;
+        public string Content;
         public DateTime CreatedAtUtc;
     }
 }

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
-using System.Web.UI.WebControls;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
@@ -19,6 +18,6 @@ namespace M101DotNet.WebApp.Models
         public string Content;
         public IEnumerable<string> Tags;
         public DateTime CreatedAtUtc;
-        public IEnumerable<Post> Comments;
+        public IEnumerable<Comment> Comments;
     }
 }

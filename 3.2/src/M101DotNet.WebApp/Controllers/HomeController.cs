@@ -22,11 +22,15 @@ namespace M101DotNet.WebApp.Controllers
             // from newest to oldest
 
             var sort = Builders<Post>.Sort.Descending(x => x.CreatedAtUtc);
-            var recentPosts = await blogContext.Posts.Find(new BsonDocument()).Sort(sort).Limit(10).ToListAsync();
+            var last10Posts = await blogContext.Posts
+                .Find(new BsonDocument())
+                .Sort(sort)
+                .Limit(10)               
+                .ToListAsync();
 
             var model = new IndexModel
             {
-                RecentPosts = recentPosts
+                RecentPosts = last10Posts
             };
 
             return View(model);
@@ -50,14 +54,6 @@ namespace M101DotNet.WebApp.Controllers
             // XXX WORK HERE
             // Insert the post into the posts collection
 
-            var post = new Post()
-            {
-                Title = model.Title,
-                Content = model.Content,
-                Tags = model.Tags.ToList()
-            };
-
-            await blogContext.Posts.InsertOneAsync(post);
 
             return RedirectToAction("Post", new { id = post.Id });
         }
@@ -69,10 +65,6 @@ namespace M101DotNet.WebApp.Controllers
 
             // XXX WORK HERE
             // Find the post with the given identifier
-            var builder = Builders<Post>.Filter;
-            var filter = builder.Eq("_id", id);
-
-            var post = await blogContext.Posts.Find(filter).SingleOrDefaultAsync();
 
             if (post == null)
             {
@@ -96,10 +88,6 @@ namespace M101DotNet.WebApp.Controllers
             // Find all the posts with the given tag if it exists.
             // Otherwise, return all the posts.
             // Each of these results should be in descending order.
-            var builder = Builders<Post>.Filter;
-            var filter = builder.AnyEq<P>(x => x.Tags, tag);
-
-            var posts = blogContext.Posts.Find
 
             return View(posts);
         }
