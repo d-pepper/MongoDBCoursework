@@ -12,12 +12,19 @@ namespace M101DotNet.WebApp.Models
         // XXX WORK HERE
         // add in the appropriate properties for a post
         // The homework instructions contain the schema.
+        [BsonId]
         public ObjectId Id;
+        [BsonElement("Author")]
         public string Author;
+        [BsonElement("Title")]
         public string Title;
+        [BsonElement("Content")]
         public string Content;
+        [BsonElement("Tags")]
         public IEnumerable<string> Tags;
+        [BsonElement("CreateAtUtc")]
         public DateTime CreatedAtUtc;
+        [BsonElement("Comments")]
         public IEnumerable<Comment> Comments;
     }
 }
